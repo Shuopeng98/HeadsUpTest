@@ -7,8 +7,8 @@
   "premultiplyAlpha": false,
   "genMipmaps": false,
   "packable": true,
-  "width": 960,
-  "height": 540,
+  "width": 540,
+  "height": 960,
   "platformSettings": {},
   "subMetas": {
     "background4567": {
