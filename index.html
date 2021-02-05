@@ -85,6 +85,87 @@
       }
     });
 })();
+   // 登录
+    /**
+     * 删除url某参数
+     * @param url
+     * @param parameter
+     * @returns {*}
+     * @constructor
+     */
+     function RemoveParameterFromUrl(url, parameters = []) {
+        parameters.forEach((item) => {
+            url = url.replace(new RegExp(`\\b${item}=[^&;]+[&;]?`, 'gi'), '', '$1');
+
+            // remove any leftover crud
+            url = url.replace(/[&;]$/, '');
+        });
+
+        return url;
+    }
+    /**
+     * 获取cookie
+     * @param name 要获取的cookie的名称
+     * @returns {*}
+     */
+    function getCookie(name) {
+        let arr;
+        const reg = new RegExp(`(^| )${name}=([^;]*)(;|$)`);
+        if (arr = document.cookie.match(reg)) {
+            return decodeURIComponent(arr[2]);
+        }
+        return '';
+    }
+    /**
+     * 设置cookie
+     * @param name cookie名称
+     * @param value cookie值
+     * @param second 过期时间，默认1800
+     * @param domain 域名，默认qq.com
+     */
+    function setCookie(name, value, second = 1800, domain = 'qq.com') {
+        const exp = new Date();
+        exp.setTime(exp.getTime() + (second * 1000));
+        document.cookie = `${name}=${encodeURIComponent(value)};domain=.${domain};path=/;expires=${exp.toGMTString()}`;
+    }
+    function doLogin(param) {
+        var url = '';
+        var href = param || location.href;
+        href = RemoveParameterFromUrl(href, ['sessionid', 'channelid']);
+        var curHost = window.location.host;
+        var isUseProductionConfig = curHost === 'jiazhang.qq.com' || curHost === 'pre.jiazhang.qq.com';
+        var BASE_HOST = isUseProductionConfig ? (curHost === 'pre.jiazhang.qq.com' ? '//pre.jz.game.qq.com' : '//jz.game.qq.com') : '//test.jz.game.qq.com';
+        // 新登录
+        var channelId = 2;
+        var WX_APP_ID = 'wxeaef343b1641dda3';
+        var redirectUri = encodeURIComponent(`https:${BASE_HOST
+        }/cgi-bin/Gateway.fcgi?method=wLogin&channelId=${
+            channelId
+        }&localParams=${window.btoa(`redirectUrl=${encodeURIComponent(href)}`)}`);
+        // 微信环境下登录
+        url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${
+            WX_APP_ID
+        }&redirect_uri=${redirectUri
+        }&response_type=code&scope=snsapi_userinfo&state=STATE&connect_redirect=1#wechat_redirect`;
+        var expire = new Date().getTime() + 60 * 60 * 1000;
+        setCookie("expire",expire);
+        location.replace(url);
+    }
+    function isLogin() {
+        var expire = getCookie("expire");
+        var now = new Date().getTime();
+        var session_id = getCookie('session_id');
+        var channel_id = getCookie('channel_id');
+        if( session_id && channel_id && session_id.length > 10 && ( expire &&  now < expire ) ){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    var hasLogin = isLogin();
+    if( !hasLogin ){
+        doLogin();
+    }
 </script>
 </body>
 </html>
